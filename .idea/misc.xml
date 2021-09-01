@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/drawable/dilog.xml" value="0.17871621621621622" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/drawable/likecheck.xml" value="0.17871621621621622" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/drawable/rect.xml" value="0.17871621621621622" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/activity_comment_section.xml" value="0.152" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/activity_main.xml" value="0.136" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/dialog_sample.xml" value="0.152" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/diloge.xml" value="0.16824324324324325" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/dilogeSample.xml" value="0.176" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/fragment_f_tabmy_post.xml" value="0.16824324324324325" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/fragment_ftabpost.xml" value="0.1" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/imageandcomment.xml" value="0.176" />
+        <entry key="..\:/Users/siva sai behera/AndroidStudioProjects/post/app/src/main/res/layout/post.xml" value="0.264" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
