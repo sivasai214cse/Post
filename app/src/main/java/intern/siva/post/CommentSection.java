@@ -5,6 +5,7 @@ import static androidx.recyclerview.widget.RecyclerView.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -42,7 +43,7 @@ public class CommentSection extends AppCompatActivity {
    EditText commentbox;
     private ArrayList<Model2> comment =new ArrayList<>();
     private RequestQueue requestQueue;
-
+public SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +54,7 @@ public class CommentSection extends AppCompatActivity {
         commentpost=findViewById(R.id.postcomment);
         String commentfrom=commentbox.getText().toString();
         recyclerView2=findViewById(R.id.recyclerviewComment);
-
+        swipeRefreshLayout=findViewById(R.id.swipe);
         String image  = getIntent().getExtras().getString("image");
         String usernames=getIntent().getExtras().getString("username");
 
@@ -69,10 +70,19 @@ public class CommentSection extends AppCompatActivity {
         linearLayoutManager.setOrientation(RecyclerView.VERTICAL);
         requestQueue=Volley.newRequestQueue(CommentSection.this);
         loadComment();
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadComment();
+                recyclerView2.getAdapter().notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
         commentpost.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 postcomment();
+                commentbox.getText().clear();
             }
         });
 
@@ -183,5 +193,6 @@ public class CommentSection extends AppCompatActivity {
         requestQueue.add(request);
 
     }
+
 
 }

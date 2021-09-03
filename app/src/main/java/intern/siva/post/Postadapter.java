@@ -2,18 +2,14 @@ package intern.siva.post;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.icu.text.Transliterator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -56,10 +52,13 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
     Glide.with(context)
             .load(imageurl).fitCenter()
             .into(holder.imageView);
+        Log.d("like","like"+posts.getLikes());
+
         if(posts.getLikes().equals("already Liked it"))
         {
-            Log.d("like","like"+posts.getName());
-            holder.liked.setImageResource(R.drawable.likebold);
+            Log.d("like","like"+posts.getLikes());
+
+          //  holder.liked.setImageResource(R.drawable.likebold);
         }
 
         holder.fullscreenimage.setOnClickListener(new View.OnClickListener() {
@@ -73,7 +72,6 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
 
             }
         });
-//
     }
 
     @Override
@@ -87,21 +85,32 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
         TextView dates;
         ImageView liked;
         ImageView fullscreenimage;
-        TextView comment;
-        Button chooseimage;
+        String status;
+
 
         public postViewholder(@NonNull @org.jetbrains.annotations.NotNull View itemView) {
             super(itemView);
-            imageView=itemView.findViewById(R.id.pic1);
-            textView=itemView.findViewById(R.id.name);
+            imageView=itemView.findViewById(R.id.myimg);
+            textView=itemView.findViewById(R.id.caption);
             dates=itemView.findViewById(R.id.date);
             liked=itemView.findViewById(R.id.like);
-            comment=itemView.findViewById(R.id.comments);
-            fullscreenimage=itemView.findViewById(R.id.pic1);
+            //  comment=itemView.findViewById(R.id.comments);
+            fullscreenimage=itemView.findViewById(R.id.myimg);
             liked.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context,"already liked",Toast.LENGTH_SHORT).show();
+                    if(status!="liked it") {
+                        liked.setImageResource(R.drawable.likebold);
+                        status = "liked it";
+                        Toast.makeText(context, "liked", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        status="already liked it";
+                        liked.setImageResource(R.drawable.like);
+                        Toast.makeText(context, "Already liked", Toast.LENGTH_SHORT).show();
+
+                    }
                 }
             });
 

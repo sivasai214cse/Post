@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -36,19 +37,33 @@ public class fTabmyPost extends Fragment {
     View view;
     RecyclerView recyclerView3;
     private RequestQueue requestQueue;
-    private ArrayList<Model> post =new ArrayList<>();
+    TextView nodata;
+    private ArrayList<Model3owbpost> mypost =new ArrayList<>();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_ftabpost, container, false);
-        recyclerView3=view.findViewById(R.id.recycler);
+        view = inflater.inflate(R.layout.fragment_f_tabmy_post, container, false);
+        recyclerView3=view.findViewById(R.id.recyclerfomypost);
+        nodata=view.findViewById(R.id.noimg);
         recyclerView3.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager =new LinearLayoutManager(getContext());
         recyclerView3.setLayoutManager(linearLayoutManager);
         linearLayoutManager.setOrientation(RecyclerView.VERTICAL);
         requestQueue= Volley.newRequestQueue(getActivity());
         forMydata();
+//        ArrayList<Model> post =new ArrayList<>();
+//        for(int i=0;i<10;i++)
+//        { post.add(new Model("siva sai","R.drawable.mem","already Liked it","2","3hrs"));
+//            Postadapter adapter =new Postadapter(getActivity(),post);
+//            recyclerView3.setAdapter(adapter);
+//        }
+        Log.d("for nodat","datano-"+mypost);
+if(mypost!=null)
+{
+    nodata.setVisibility(View.GONE);
+}
+
         return inflater.inflate(R.layout.fragment_f_tabmy_post, container, false);
 
     }
@@ -64,11 +79,11 @@ public class fTabmyPost extends Fragment {
                     for (int i=0;i<jsonArray.length();i++)
                     {
                         JSONObject hit=jsonArray.getJSONObject(i);
-                        String name =hit.getString("username");
+                        String name =hit.getString("details");
                         String image =hit.getString("image");
                         String date =hit.getString("datetime");
                         int id=hit.getInt("id");
-                        post.add(new Model(name,image,"none",String.valueOf(id),date));
+                        mypost.add(new Model3owbpost(date,name,String.valueOf(id),image,"3"));
 
 
                     }
@@ -77,7 +92,7 @@ public class fTabmyPost extends Fragment {
                         Log.d("data","likebug ");
                         Toast.makeText(getContext(),"NO API FOUND",Toast.LENGTH_SHORT).show();
                     }
-                    Postadapter adapter =new Postadapter(getActivity(),post);
+                    MypostAdapter adapter =new MypostAdapter(getActivity(),mypost);
                     recyclerView3.setAdapter(adapter);
 
                 } catch (JSONException e) {

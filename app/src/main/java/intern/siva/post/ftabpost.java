@@ -80,8 +80,12 @@ public class ftabpost extends Fragment {
             public void onResponse(JSONObject response) {
 
                 try {
-                    JSONObject jsonObject= new JSONObject(response.toString());
-                    like=jsonObject.getString("error");
+                    if (response.getString("error")=="") {
+                        like="already Liked it";
+                        Toast.makeText(getActivity(), "Liked", Toast.LENGTH_SHORT).show();
+
+                    }
+                    else like = "not liked";
 
                 } catch (JSONException e) {
                     Log.d("Likeapi", "likebug "+e);

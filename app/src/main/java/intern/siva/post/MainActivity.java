@@ -246,95 +246,95 @@ public class MainActivity extends AppCompatActivity {
                 requestQueue.add(request);
     }
 
-    public   String forLike(int id)
-
-            {
-              String apiurl = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/postLike/"+id;
-
-                    JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, apiurl, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-
-                            try {
-                                JSONObject jsonObject= new JSONObject(response.toString());
-                                like=jsonObject.getString("error");
-
-                            } catch (JSONException e) {
-                                Log.d("Likeapi", "likebug "+e);
-                                Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
-
-                        }
-
-
-                    }){
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError {
-                            Map<String, String>  params = new HashMap<String, String>();
-                            params.put("authtoken","0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
-                            return params;
-                        }
-                    };
-                request.setRetryPolicy(new DefaultRetryPolicy(
-                        6000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-                requestQueue.add(request);
-
-        return like;
-    }
-    private void forUserData() {
-
-        String url = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/displayPost/0";
-        JsonObjectRequest request =new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-
-                    JSONArray jsonArray =response.getJSONArray("data");
-                    for (int i=0;i<jsonArray.length();i++)
-                    {
-                        JSONObject hit=jsonArray.getJSONObject(i);
-                        String name =hit.getString("username");
-                        String image =hit.getString("image");
-                        String date =hit.getString("datetime");
-                        int id=hit.getInt("id");
-                        post.add(new Model(name,image,forLike(id),String.valueOf(id),date));
-
-
-                    }
-                    if(jsonArray.length()==0)
-                    {
-                        Log.d("data","likebug ");
-                        Toast.makeText(MainActivity.this,"NO API FOUND",Toast.LENGTH_SHORT).show();
-                    }
-                    Postadapter adapter =new Postadapter(MainActivity.this,post);
-                    recyclerView.setAdapter(adapter);
-
-                } catch (JSONException e) {
-                   e.printStackTrace();
-                }
-
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                error.printStackTrace();
-
-
-            }
-        });
-   requestQueue.add(request);
-
-    }
+//    public   String forLike(int id)
+//
+//            {
+//              String apiurl = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/postLike/"+id;
+//
+//                    JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, apiurl, null, new Response.Listener<JSONObject>() {
+//                        @Override
+//                        public void onResponse(JSONObject response) {
+//
+//                            try {
+//                                JSONObject jsonObject= new JSONObject(response.toString());
+//                                like=jsonObject.getString("error");
+//
+//                            } catch (JSONException e) {
+//                                Log.d("Likeapi", "likebug "+e);
+//                                Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+//
+//                    }, new Response.ErrorListener() {
+//                        @Override
+//                        public void onErrorResponse(VolleyError error) {
+//                            Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
+//
+//                        }
+//
+//
+//                    }){
+//                        @Override
+//                        public Map<String, String> getHeaders() throws AuthFailureError {
+//                            Map<String, String>  params = new HashMap<String, String>();
+//                            params.put("authtoken","0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
+//                            return params;
+//                        }
+//                    };
+//                request.setRetryPolicy(new DefaultRetryPolicy(
+//                        6000,
+//                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+//                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+//
+//                requestQueue.add(request);
+//
+//        return like;
+//    }
+//    private void forUserData() {
+//
+//        String url = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/displayPost/0";
+//        JsonObjectRequest request =new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                try {
+//
+//                    JSONArray jsonArray =response.getJSONArray("data");
+//                    for (int i=0;i<jsonArray.length();i++)
+//                    {
+//                        JSONObject hit=jsonArray.getJSONObject(i);
+//                        String name =hit.getString("username");
+//                        String image =hit.getString("image");
+//                        String date =hit.getString("datetime");
+//                        int id=hit.getInt("id");
+//                        post.add(new Model(name,image,forLike(id),String.valueOf(id),date));
+//
+//
+//                    }
+//                    if(jsonArray.length()==0)
+//                    {
+//                        Log.d("data","likebug ");
+//                        Toast.makeText(MainActivity.this,"NO API FOUND",Toast.LENGTH_SHORT).show();
+//                    }
+//                    Postadapter adapter =new Postadapter(MainActivity.this,post);
+//                    recyclerView.setAdapter(adapter);
+//
+//                } catch (JSONException e) {
+//                   e.printStackTrace();
+//                }
+//
+//
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//
+//                error.printStackTrace();
+//
+//
+//            }
+//        });
+//   requestQueue.add(request);
+//
+//    }
 
 }
