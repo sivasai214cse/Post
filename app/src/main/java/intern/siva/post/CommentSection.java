@@ -3,10 +3,12 @@ package intern.siva.post;
 import static androidx.recyclerview.widget.RecyclerView.*;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +37,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommentSection extends AppCompatActivity {
+
+
    ImageView imageload;
    TextView username;
    String id;
@@ -43,16 +47,20 @@ public class CommentSection extends AppCompatActivity {
    EditText commentbox;
     private ArrayList<Model2> comment =new ArrayList<>();
     private RequestQueue requestQueue;
-public SwipeRefreshLayout swipeRefreshLayout;
+    int totalcomments;
+    public SwipeRefreshLayout swipeRefreshLayout;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_comment_section);
         imageload=findViewById(R.id.imageload);
         username=findViewById(R.id.username);
         commentbox=findViewById(R.id.commentbox);
         commentpost=findViewById(R.id.postcomment);
-        String commentfrom=commentbox.getText().toString();
         recyclerView2=findViewById(R.id.recyclerviewComment);
         swipeRefreshLayout=findViewById(R.id.swipe);
         String image  = getIntent().getExtras().getString("image");
@@ -73,6 +81,7 @@ public SwipeRefreshLayout swipeRefreshLayout;
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                comment.clear();
                 loadComment();
                 recyclerView2.getAdapter().notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
@@ -81,14 +90,17 @@ public SwipeRefreshLayout swipeRefreshLayout;
         commentpost.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 postcomment();
                 commentbox.getText().clear();
+                loadComment();
             }
         });
-
+//        Bundle bundel=new Bundle();
+//        bundel.putString("totalcomment", String.valueOf(totalcomments));
     }
 
-    private void postcomment() {
+    private void postcomment()  {
       String  apiurl="https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/commentOnPost";
         HashMap<String , Object> hashMap = new HashMap<>();
         hashMap.put("id" ,id);
@@ -158,7 +170,10 @@ public SwipeRefreshLayout swipeRefreshLayout;
                         String id=hit.getString("id");
                         comment.add(new Model2(usercomment2,username1,date,id));
 
+                      //  Totalcomments(id);
+
                     }
+                //    totalcomments=jsonArray.length();
 
                     CommentAdapter adapter =new CommentAdapter(CommentSection.this,comment);
                     recyclerView2.setAdapter(adapter);
@@ -192,6 +207,18 @@ public SwipeRefreshLayout swipeRefreshLayout;
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
 
+    }
+
+    private void Totalcomments(String id) {
+        Bundle bundel=new Bundle();
+        bundel.putString("totalcomment", String.valueOf(totalcomments));
+        Fragment fragment=new ftabpost();
+        fragment.setArguments(bundel);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.tabpost,fragment)
+                .commit();
     }
 
 

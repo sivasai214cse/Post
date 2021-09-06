@@ -1,15 +1,18 @@
 package intern.siva.post;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -32,14 +35,8 @@ import java.util.Map;
 
 public class ftabpost extends Fragment {
 
-
-
-
-
-
-
-    public ftabpost() {
-        // Required empty public constructor
+    public ftabpost()
+    {
     }
 
 
@@ -48,10 +45,13 @@ public class ftabpost extends Fragment {
     String like="already Liked it";
     private RequestQueue requestQueue;
     private ArrayList<Model> post =new ArrayList<>();
+    public SwipeRefreshLayout refreshpost;
+    String totalcomment="0";
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_ftabpost, container, false);
         recyclerView=view.findViewById(R.id.recycler);
         recyclerView.setHasFixedSize(true);
@@ -59,16 +59,30 @@ public class ftabpost extends Fragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         linearLayoutManager.setOrientation(RecyclerView.VERTICAL);
          requestQueue= Volley.newRequestQueue(getActivity());
+        refreshpost=view.findViewById(R.id.refreshpost);
+        forUserData();
 
-//add();
 //        ArrayList<Model> post =new ArrayList<>();
 //        for(int i=0;i<10;i++)
 //        { post.add(new Model("siva sai","R.drawable.mem","already Liked it","2","3hrs"));
-//        }
-        forUserData();
-    //    Postadapter adapter =new Postadapter(getActivity(),post);
-    //    recyclerView.setAdapter(adapter);
+//        }  //    Postadapter adapter =new Postadapter(getActivity(),post);
+//    //    recyclerView.setAdapter(adapter);
+
+  //  totalcomment=getArguments().getString("totalcomment");
+
+        refreshpost.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                post.clear();
+                forUserData();
+                recyclerView.getAdapter().notifyDataSetChanged();
+                refreshpost.setRefreshing(false);
+            }
+        });
+
         return view;
+
+
     }
     public   String forLike(int id)
 
@@ -133,7 +147,7 @@ public class ftabpost extends Fragment {
                         String image =hit.getString("image");
                         String date =hit.getString("datetime");
                         int id=hit.getInt("id");
-                        post.add(new Model(name,image,forLike(id),String.valueOf(id),date));
+                        post.add(new Model(name,image,forLike(id),String.valueOf(id),date,totalcomment));
 
 
                     }
@@ -144,6 +158,7 @@ public class ftabpost extends Fragment {
                     }
                     Postadapter adapter =new Postadapter(getActivity(),post);
                     recyclerView.setAdapter(adapter);
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();

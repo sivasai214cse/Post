@@ -108,7 +108,7 @@
         app:layout_constraintTop_toTopOf="@+id/textView12" />
 
     <TextView
-        android:id="@+id/textView15"
+        android:id="@+id/noofComments"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -142,7 +142,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="Comment"
-        android:onClick="comment"
         android:textColor="#67BDC5"
         app:layout_constraintEnd_toStartOf="@+id/imageView6"
         app:layout_constraintHorizontal_bias="0.5"

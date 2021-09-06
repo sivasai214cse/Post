@@ -8,12 +8,15 @@ public class Model {
     private String date;
     String comments;
 
-    public Model(String name, String image, String likes, String id, String date) {
+
+
+    public Model(String name, String image, String likes, String id, String date,String comments) {
         this.name = name;
         this.image = image;
         this.likes = likes;
         this.id = id;
         this.date = date;
+        this.comments=comments;
     }
 
     public String getName() {
@@ -54,6 +57,14 @@ public class Model {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }
 

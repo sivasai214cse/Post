@@ -3,13 +3,18 @@ package intern.siva.post;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -21,22 +26,27 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TableLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,6 +54,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -53,27 +64,32 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    String like="already Liked it";
-    String apiurl = "https://putatoetest-k3snqinenq-uc.a.run.app";
     private   ArrayList<Model> post =new ArrayList<>();
     ImageView likecheck;
     ImageView postimage;
     Uri imagedata;
     Bitmap bitmap;
     String binaryimgfrmt;
-
+    static String captionstr;
     TabItem tabpost;
+    TextInputLayout caption;
     TabItem tabmypost;
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
     private RequestQueue requestQueue;
     TabLayout tabLayout;
 
+
+    private String filePath;
+    String image_selectedStatus;
+    private static final String ROOT_URL = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/addToPost";;
+    private static final int REQUEST_PERMISSIONS = 100;
+    private static final int PICK_IMAGE_REQUEST =1 ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        setContentView(R.layout.activity_main);
         recyclerView=findViewById(R.id.recycler);
         likecheck=findViewById(R.id.like);
         postimage=findViewById(R.id.postimage);
@@ -81,11 +97,6 @@ public class MainActivity extends AppCompatActivity {
         tabpost=findViewById(R.id.tabpost);
         tabmypost=findViewById(R.id.tabmypost);
         viewPager=findViewById(R.id.viewpager);
-
-        //recyclerView.setHasFixedSize(true);
-//        LinearLayoutManager linearLayoutManager =new LinearLayoutManager(this);
-//        recyclerView.setLayoutManager(linearLayoutManager);
-//        linearLayoutManager.setOrientation(RecyclerView.VERTICAL);
 
         pagerAdapter =new pageAdapter(getSupportFragmentManager(),tabLayout.getTabCount());
         viewPager.setAdapter(pagerAdapter);
@@ -115,8 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        requestQueue=Volley.newRequestQueue(this);
-     //   forUserData();
+        requestQueue=Volley.newRequestQueue(MainActivity.this);
 
 
         postimage.setOnClickListener(new View.OnClickListener() {
@@ -141,19 +151,34 @@ public class MainActivity extends AppCompatActivity {
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         Button publish =dialog.findViewById(R.id.Publish);
         Button choose =dialog.findViewById(R.id.chooseimage);
+        caption =dialog.findViewById(R.id.captionpost);
+        String val = caption.getEditText().getText().toString();
+        Log.d("caption","details-"+val);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                ImagePicker.with(MainActivity.this)
-                        .crop()	    			//Crop image(Optional), Check Customization for more option
-                        .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-                        .start(10);
+            public void onClick(View view) {
+                if ((ContextCompat.checkSelfPermission(getApplicationContext(),
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
+                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+                    if ((ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)) && (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            Manifest.permission.READ_EXTERNAL_STORAGE))) {
+
+                    } else {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                                REQUEST_PERMISSIONS);
+                    }
+                } else {
+                    Log.e("Else", "Else");
+                    showFileChooser();
+                }
             }
         });
         publish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                postimage();
+                postimage(bitmap);
                 dialog.dismiss();
             }
         });
@@ -161,180 +186,126 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)  {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d( "onActivityResult: ",String.valueOf(resultCode));
-        if(resultCode!=10) {
-            Uri uri = data.getData();
-            imagedata=uri;
-            try {
-                bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
-              //postimage.setImageBitmap(bitmap);
-                convertiobinary(bitmap);
 
-                Log.d("binary","binary -"+binaryimgfrmt);
-            }catch (Exception e)
-            {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri picUri = data.getData();
+            filePath = getPath(picUri);
+            if (filePath != null) {
+                try {
 
+
+                    Log.d("filePath", String.valueOf(filePath));
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
+                    Log.d("bitmap",bitmap.toString());
+
+//                    imageView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-
+            else
+            {
+                Toast.makeText(
+                        MainActivity.this,"no image selected",
+                        Toast.LENGTH_LONG).show();
+            }
         }
 
+    }
+    public String getPath(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        String document_id = cursor.getString(0);
+        document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
+        cursor.close();
 
+        cursor = getContentResolver().query(
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+
+        return path;
     }
 
-    private void convertiobinary(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream =new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
-        byte[] bytesofimage=byteArrayOutputStream.toByteArray();
-        binaryimgfrmt=android.util.Base64.encodeToString(bytesofimage, Base64.DEFAULT);
-
+    public byte[] getFileDataFromDrawable(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
     }
 
-    private void postimage() {
-        apiurl=apiurl+"/v1/api/addToPost";
-        HashMap<String , Object> hashMap = new HashMap<>();
-        hashMap.put("image" ,binaryimgfrmt);
-        hashMap.put("detail","hello");
-        JsonObjectRequest request =new JsonObjectRequest(Request.Method.POST, apiurl, new JSONObject(hashMap), new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
 
-             try {  Log.d("sucess","sucess"+imagedata);
-                 if (response.getString("error")=="") {
-                     Toast.makeText(MainActivity.this, "Successfully published", Toast.LENGTH_SHORT).show();
-                 } else
-                     Toast.makeText(MainActivity.this, "Unsuccessful", Toast.LENGTH_SHORT).show();
+    private void postimage(Bitmap bitmap) {
 
-             } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "json error "+e.toString(), Toast.LENGTH_SHORT).show();
-                    //enable the button
-                    Log.d("jsonException",e.toString());
-                    e.printStackTrace();
-                }}
-        },
+        String strcmp = caption.getEditText().getText().toString();
+        VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, ROOT_URL,
+                new Response.Listener<NetworkResponse>() {
+                    @Override
+                    public void onResponse(NetworkResponse response) {
+                        try {
+                            JSONObject obj = new JSONObject(new String(response.data));
+                            Toast.makeText(MainActivity.this, "uploaded", Toast.LENGTH_LONG).show();
+
+                        } catch (JSONException e) {
+
+                            e.printStackTrace();
+                        }
+                    }
+                },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this,"Unsucessful",Toast.LENGTH_SHORT).show();
-                        Log.d("kkk","Service Error:"+error.toString());
-
-
+                        Toast.makeText(
+                                MainActivity.this, "no image selected",
+                                Toast.LENGTH_LONG).show();
+                        Log.e("GotError", "" + error.getMessage());
                     }
-                })
+                }) {
+
+            @Nullable
+
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+                long imagename = System.currentTimeMillis();
+                params.put("files", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
+                return params;
+            }
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String, String> params = new HashMap<>();
+                params.put("detail", strcmp);
+                return params;
+            }
 
 
-
-        {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("authtoken", "0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
-               return params;
+                Map<String, String> params = new HashMap<String, String>();
 
+
+                params.put("authtoken","0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
+
+                return params;
             }
         };
 
+        //adding the request to volley
+        Volley.newRequestQueue(this).add(volleyMultipartRequest);
 
-        request.setRetryPolicy(new DefaultRetryPolicy(
-                6000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                requestQueue.add(request);
     }
-
-//    public   String forLike(int id)
-//
-//            {
-//              String apiurl = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/postLike/"+id;
-//
-//                    JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, apiurl, null, new Response.Listener<JSONObject>() {
-//                        @Override
-//                        public void onResponse(JSONObject response) {
-//
-//                            try {
-//                                JSONObject jsonObject= new JSONObject(response.toString());
-//                                like=jsonObject.getString("error");
-//
-//                            } catch (JSONException e) {
-//                                Log.d("Likeapi", "likebug "+e);
-//                                Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
-//                            }
-//                        }
-//
-//                    }, new Response.ErrorListener() {
-//                        @Override
-//                        public void onErrorResponse(VolleyError error) {
-//                            Toast.makeText(getApplicationContext(),"NO data fetched",Toast.LENGTH_SHORT).show();
-//
-//                        }
-//
-//
-//                    }){
-//                        @Override
-//                        public Map<String, String> getHeaders() throws AuthFailureError {
-//                            Map<String, String>  params = new HashMap<String, String>();
-//                            params.put("authtoken","0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
-//                            return params;
-//                        }
-//                    };
-//                request.setRetryPolicy(new DefaultRetryPolicy(
-//                        6000,
-//                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//
-//                requestQueue.add(request);
-//
-//        return like;
-//    }
-//    private void forUserData() {
-//
-//        String url = "https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/displayPost/0";
-//        JsonObjectRequest request =new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-//            @Override
-//            public void onResponse(JSONObject response) {
-//                try {
-//
-//                    JSONArray jsonArray =response.getJSONArray("data");
-//                    for (int i=0;i<jsonArray.length();i++)
-//                    {
-//                        JSONObject hit=jsonArray.getJSONObject(i);
-//                        String name =hit.getString("username");
-//                        String image =hit.getString("image");
-//                        String date =hit.getString("datetime");
-//                        int id=hit.getInt("id");
-//                        post.add(new Model(name,image,forLike(id),String.valueOf(id),date));
-//
-//
-//                    }
-//                    if(jsonArray.length()==0)
-//                    {
-//                        Log.d("data","likebug ");
-//                        Toast.makeText(MainActivity.this,"NO API FOUND",Toast.LENGTH_SHORT).show();
-//                    }
-//                    Postadapter adapter =new Postadapter(MainActivity.this,post);
-//                    recyclerView.setAdapter(adapter);
-//
-//                } catch (JSONException e) {
-//                   e.printStackTrace();
-//                }
-//
-//
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//
-//                error.printStackTrace();
-//
-//
-//            }
-//        });
-//   requestQueue.add(request);
-//
-//    }
-
 }

@@ -1,6 +1,8 @@
 package intern.siva.post;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
@@ -31,7 +34,7 @@ import java.util.Map;
 
 public class MypostAdapter extends RecyclerView.Adapter<MypostAdapter.Mypostholder> {
     Context context;
-    ArrayList<Model3owbpost> mypost ;
+   public ArrayList<Model3owbpost> mypost ;
     public MypostAdapter (Context context,ArrayList<Model3owbpost> mypost)
     {
         this.context=context;
@@ -47,6 +50,7 @@ public class MypostAdapter extends RecyclerView.Adapter<MypostAdapter.Myposthold
 
     @Override
     public void onBindViewHolder(@NonNull Mypostholder holder, int position) {
+
         Model3owbpost myposts=mypost.get(position);
         String imageurl=myposts.getImage();
 
@@ -55,68 +59,91 @@ public class MypostAdapter extends RecyclerView.Adapter<MypostAdapter.Myposthold
         Glide.with(context)
                 .load(imageurl).fitCenter()
                 .into(holder.postedimg);
+        holder.likes.setText(myposts.getLike());
+        int id =Integer.parseInt(myposts.getId());
+
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deletepost("5");
+
+                AlertDialog.Builder alertDialog= new AlertDialog.Builder(context);
+                alertDialog.setCancelable(false)
+                        .setTitle("Delete permanently?")
+                        .setPositiveButton("Confirm", (dialog, which) -> {deletepost(id);})
+                        .setNegativeButton("Cancel", (dialog, which) -> {})
+                        .setMessage("!!!").show();
+            }
+        });
+
+        holder.comments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i =new Intent(context,CommentSection.class);
+                i.putExtra("image",imageurl);
+                i.putExtra("username", myposts.getDetails());
+                i.putExtra("id",myposts.getId());
+                context.startActivity(i);
             }
         });
 
     }
-    private void deletepost(String id) {
-         RequestQueue requestQueue;
-        requestQueue= Volley.newRequestQueue(context);
 
-        String  apiurl="https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/deletePost";
-        HashMap<String , Object> hashMap = new HashMap<>();
-        hashMap.put("id" ,id);
-        hashMap.put("iscomment","0");
-        JsonObjectRequest request =new JsonObjectRequest(Request.Method.POST, apiurl, new JSONObject(hashMap), new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
+    private void deletepost(int id) {
 
-                try {  //Log.d("sucess","sucess");
-                    if (response.getString("status")=="true") {
-                        Toast.makeText(context, "deleted", Toast.LENGTH_SHORT).show();
-                    } else
-                        Toast.makeText(context, "Unsuccessful", Toast.LENGTH_SHORT).show();
+        String url="https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/deletePost";
+        RequestQueue requestQueue=Volley.newRequestQueue(context);
+        HashMap<String, Object> hashMap=new HashMap<>();
 
-                } catch (Exception e) {
-                    Toast.makeText(context, "json error "+e.toString(), Toast.LENGTH_SHORT).show();
-                    //enable the button
-                    Log.d("jsonException",e.toString());
-                    e.printStackTrace();
-                }}
-        },
-                new Response.ErrorListener() {
+        hashMap.put("is_comment",0);
+        Log.d("id","id of   user-"+id);
+        hashMap.put("id",id);
+
+        JsonObjectRequest jsonObjectRequest=new JsonObjectRequest(Request.Method.POST,url,new JSONObject(hashMap),
+                new Response.Listener<JSONObject>(){
                     @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context,"Unsucessful",Toast.LENGTH_SHORT).show();
-                        Log.d("kkk","Service Error:"+error.toString());
+                    public void onResponse(JSONObject response){
+                        Log.d("mypost data","image-"+id);
+                        Log.d("Response is ",response.toString());
+                        try{
+                            if(response.getString("error").equals("")) {
+                                Toast.makeText(context, "deleted", Toast.LENGTH_LONG).show();
+                            }
+                            else
+                                Toast.makeText(context, "failed", Toast.LENGTH_LONG).show();
 
+                        }catch(JSONException e){
+                            Toast.makeText(context,"json error "+e.toString(),Toast.LENGTH_SHORT).show();
+                            Log.d("jsonException",e.toString());
+                            e.printStackTrace();
+                        }
 
                     }
-                })
+                },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
 
+                Toast.makeText(context,"error "+error.toString(),Toast.LENGTH_SHORT).show();//enable the button
+                Log.d("delete error","Service Error:"+error.toString());
 
-
+            }
+        })
         {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("authtoken", "0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
+            public Map<String, String> getHeaders()throws AuthFailureError{
+                Map<String, String> params=new HashMap<String, String>();
+                params.put("authtoken","0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
                 return params;
-
             }
         };
 
-
-        request.setRetryPolicy(new DefaultRetryPolicy(
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(
                 6000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        requestQueue.add(request);
+
+        requestQueue.add(jsonObjectRequest);
     }
+
 
 
     @Override
@@ -131,7 +158,7 @@ public class MypostAdapter extends RecyclerView.Adapter<MypostAdapter.Myposthold
        TextView likes;
        ImageView postedimg;
        ImageView delete;
-
+       TextView comments;
 
         public Mypostholder(@NonNull View itemView) {
             super(itemView);
@@ -139,6 +166,8 @@ public class MypostAdapter extends RecyclerView.Adapter<MypostAdapter.Myposthold
             postedimg=itemView.findViewById(R.id.myimg);
             details=itemView.findViewById(R.id.caption);
             delete=itemView.findViewById(R.id.deletepost);
+            likes=itemView.findViewById(R.id.mylikes);
+            comments=itemView.findViewById(R.id.comments);
 
 
 
