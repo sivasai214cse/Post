@@ -22,24 +22,24 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="40dp"
+        android:layout_width="21dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="36dp"
         android:backgroundTint="#FAFAFA"
-        app:layout_constraintBottom_toBottomOf="@+id/imageload"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageload"
         app:srcCompat="@drawable/likebold"
-        app:tint="#7E7E7E" />
+        app:tint="#5FB6BD" />
 
     <ImageView
         android:id="@+id/imageView4"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="40dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageload"
+        android:layout_width="22dp"
+        android:layout_height="23dp"
+        android:layout_marginEnd="36dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageload"
         app:srcCompat="@drawable/share"
-        app:tint="#686868" />
+        app:tint="#85F5FF" />
 
     <EditText
         android:id="@+id/commentbox"
@@ -113,6 +113,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/commentbox" />
+
+    <TextView
+        android:id="@+id/totallikes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="20 "
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/imageload" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

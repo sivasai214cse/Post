@@ -31,9 +31,10 @@ import org.json.JSONObject;
 import java.util.*;
 
 public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder>{
-
+    String totalLikes;
     Context context;
    public ArrayList<Model> post;
+
 
     public Postadapter(Context context, ArrayList<Model> post)
     {
@@ -70,6 +71,7 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
         holder.fullscreenimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Intent i =new Intent(context,CommentSection.class);
                i.putExtra("image",imageurl);
                i.putExtra("username",posts.getName());
@@ -101,10 +103,12 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
         holder.comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                likesonpost(posts.getId());
                 Intent i =new Intent(context,CommentSection.class);
                 i.putExtra("image",imageurl);
                 i.putExtra("username",posts.getName());
                 i.putExtra("id",posts.getId());
+                i.putExtra("totalLikes",holder.totalLikes);
                 context.startActivity(i);
 
 
@@ -207,6 +211,55 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
 
     }
 
+    private void likesonpost(String id) {
+        RequestQueue requestQueue;
+        requestQueue= Volley.newRequestQueue(context);
+        String apiurl="https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/single_post/"+id;
+        JsonObjectRequest request =new JsonObjectRequest(Request.Method.GET, apiurl, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+
+                    JSONArray jsonArray =response.getJSONArray("data");
+                    for (int i=0;i<jsonArray.length();i++)
+                    {
+                        JSONObject hit=jsonArray.getJSONObject(i);
+                        totalLikes =hit.getString("total_like");
+                    }
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                error.printStackTrace();
+
+
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<>();
+                params.put("authtoken", "0P1EYPE7B2OSZ198S2WTVI7BLYCP8J7QV4WCG9FHBXHBMOOD6G");
+                return params;
+
+            }
+        };
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                6000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        requestQueue.add(request);
+
+
+    }
+
     @Override
     public int getItemCount() {
             return post.size();
@@ -221,7 +274,7 @@ public class Postadapter extends RecyclerView.Adapter<Postadapter.postViewholder
         String status;
         TextView comment;
         TextView totalcomment;
-
+        String totalLikes;
 
         public postViewholder(@NonNull @org.jetbrains.annotations.NotNull View itemView) {
             super(itemView);

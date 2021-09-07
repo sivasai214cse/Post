@@ -305,7 +305,13 @@ public class MainActivity extends AppCompatActivity {
         };
 
         //adding the request to volley
-        Volley.newRequestQueue(this).add(volleyMultipartRequest);
+        //Volley.newRequestQueue(this).add(volleyMultipartRequest);
+        volleyMultipartRequest.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        requestQueue.add(volleyMultipartRequest);
+
 
     }
 }

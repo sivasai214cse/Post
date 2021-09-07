@@ -45,9 +45,9 @@ public class CommentSection extends AppCompatActivity {
    RecyclerView recyclerView2;
    Button commentpost;
    EditText commentbox;
+   TextView totallikes;
     private ArrayList<Model2> comment =new ArrayList<>();
     private RequestQueue requestQueue;
-    int totalcomments;
     public SwipeRefreshLayout swipeRefreshLayout;
 
 
@@ -63,14 +63,19 @@ public class CommentSection extends AppCompatActivity {
         commentpost=findViewById(R.id.postcomment);
         recyclerView2=findViewById(R.id.recyclerviewComment);
         swipeRefreshLayout=findViewById(R.id.swipe);
+        totallikes=findViewById(R.id.totallikes);
+
+
         String image  = getIntent().getExtras().getString("image");
         String usernames=getIntent().getExtras().getString("username");
-
         id=getIntent().getExtras().getString("id");
+       String totalLikes=getIntent().getExtras().getString("totalLikes");
+       Toast.makeText(CommentSection.this,"likes"+totalLikes,Toast.LENGTH_SHORT).show();
         Glide.with(getApplicationContext())
                 .load(image)
                 .into(imageload);
         username.setText(usernames);
+        totallikes.setText(totalLikes);
 
         recyclerView2.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(CommentSection.this);
@@ -99,6 +104,8 @@ public class CommentSection extends AppCompatActivity {
 //        Bundle bundel=new Bundle();
 //        bundel.putString("totalcomment", String.valueOf(totalcomments));
     }
+
+
 
     private void postcomment()  {
       String  apiurl="https://putatoetest-k3snqinenq-uc.a.run.app/v1/api/commentOnPost";
@@ -209,17 +216,6 @@ public class CommentSection extends AppCompatActivity {
 
     }
 
-    private void Totalcomments(String id) {
-        Bundle bundel=new Bundle();
-        bundel.putString("totalcomment", String.valueOf(totalcomments));
-        Fragment fragment=new ftabpost();
-        fragment.setArguments(bundel);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.tabpost,fragment)
-                .commit();
-    }
 
 
 }
